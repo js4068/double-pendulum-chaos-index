@@ -35,39 +35,7 @@ N = int((tN - t0) // h)
 
 t = np.linspace(t0, tN, N + 1)
 
-## Double Pendulum Equations
-
-# def w1dot(y):
-    
-#     theta1 = y[0]
-#     w1 = y[1]
-#     theta2 = y[2]
-#     w2 = y[3]
-    
-#     delta = theta2 - theta1
-    
-#     return((m2*l1*np.sin(delta)*np.cos(delta)*w1**2 + m2*g*np.sin(theta2)*np.cos(delta) + 
-#             m2*l2*np.sin(delta)*w2**2 - (m1 + m2)*g*np.sin(theta1)) / 
-#            ((m1 + m2)*l1 - m2*l1*(np.cos(delta))**2))
-
-# def w2dot(y):
-    
-#     theta1 = y[0]
-#     w1 = y[1]
-#     theta2 = y[2]
-#     w2 = y[3]
-    
-#     delta = theta2 - theta1
-    
-#     return((-m2*l2*np.sin(delta)*np.cos(delta)*w2**2 + (m1 + m2)*(g*np.sin(theta1)*np.cos(delta) - 
-#             l1*np.sin(delta)*w1**2 - g*np.sin(theta2))) / 
-#            ((m1 + m2)*l1 - m2*l1*(np.cos(delta))**2))
-
-# def theta1dot(y): return(y[1])
-
-# def theta2dot(y): return(y[3])
-
-## Define our state vector
+## Double pendulum equations and state vector
 
 y0 = np.array([theta1_0, w1_0, theta2_0, w2_0], dtype=float)
 
@@ -109,65 +77,28 @@ def RK4_DP(y0, t, h):
 
     return(y)
 
-# print(RK4_DP(y0, t, h))
-
 ## Plot of the trajectory of the Double Pendulum
 
-# trajectory = RK4_DP(y0, t, h)
+trajectory = RK4_DP(y0, t, h)
 
-# fig = plt.figure(0, figsize = (8,6))
-# ax0 = fig.add_subplot(1,1,1)
+fig = plt.figure(0, figsize = (8,6))
+ax0 = fig.add_subplot(1,1,1)
 
-# X1 = l1 * np.sin(trajectory[:, 0])
-# Y1 = - l1 * np.cos(trajectory[:, 0])
+X1 = l1 * np.sin(trajectory[:, 0])
+Y1 = - l1 * np.cos(trajectory[:, 0])
 
-# X2 = X1 + l2 * np.sin(trajectory[:, 2])
-# Y2 = Y1 - l2 * np.cos(trajectory[:, 2])
+X2 = X1 + l2 * np.sin(trajectory[:, 2])
+Y2 = Y1 - l2 * np.cos(trajectory[:, 2])
 
-# # ax0.plot(X1, Y1, color='blue')
-# ax0.plot(X2, Y2, color='red')
+# ax0.plot(X1, Y1, color='blue')
+ax0.plot(X2, Y2, color='red')
 
+plt.xlabel("X", fontsize=14)
+plt.ylabel("Y", fontsize=14)
+plt.title(f"Trajectory of double pendulum at θ₁ = {np.degrees(theta1_0):.3g}° and θ₂ = {np.degrees(theta2_0):.3g}°", fontsize=16)
+ax0.set_aspect('equal')
 
-# ax0.set_xlabel('X')
-# ax0.set_ylabel('Y')
-# ax0.set_aspect('equal')
-
-# plt.show()
-
-## Double Pendulum animation
-
-# from matplotlib.animation import FuncAnimation
-
-# fig, ax = plt.subplots(figsize=(6,6))
-# ax.set_xlim(-(l1+l2+0.5), l1+l2+0.5)
-# ax.set_ylim(-(l1+l2+0.5), l1+l2+0.5)
-# ax.set_aspect('equal')
-
-# line, = ax.plot([], [], 'o-', lw=2)  # line connecting the bobs
-# trace, = ax.plot([], [], '-', lw=1, color='lightgray')  # optional path trace
-
-# # Store previous positions for trace
-# trace_x, trace_y = [], []
-
-# def init():
-#     line.set_data([], [])
-#     trace.set_data([], [])
-#     return line, trace
-
-# def update(i):
-#     x = [0, X1[i], X2[i]]
-#     y = [0, Y1[i], Y2[i]]
-#     line.set_data(x, y)
-    
-#     # Append for trace
-#     trace_x.append(X2[i])
-#     trace_y.append(Y2[i])
-#     trace.set_data(trace_x, trace_y)
-    
-#     return line, trace
-
-# ani = FuncAnimation(fig, update, frames=len(t), init_func=init, blit=True, interval=10)
-# plt.show()
+plt.show()
 
 ## Defining how 'chaotic' the pendulum becomes
 
@@ -219,8 +150,8 @@ def chaos_angle(w1_var, w2_var, t, h, num):
 @njit(parallel=True)
 def chaos_freq(theta1_var, theta2_var, t, h, num):
     
-    w1_var = np.linspace(-40, 40, num)
-    w2_var = np.linspace(-40, 40, num)
+    w1_var = np.linspace(-30, 30, num)
+    w2_var = np.linspace(-30, 30, num)
 
     
     chaos_index = np.zeros((num, num))
@@ -231,7 +162,7 @@ def chaos_freq(theta1_var, theta2_var, t, h, num):
     for i in prange(num):
         for j in range(num):
             
-            y_var = np.array([theta1_var, w1_var[i], theta2_var, w2_var[i]])
+            y_var = np.array([theta1_var, w1_var[i], theta2_var, w2_var[j]])
             
             y_var_chaos = np.array([theta1_var, w1_var[i] + 1e-8, theta2_var, w2_var[j] + 1e-8])
             
@@ -243,23 +174,31 @@ def chaos_freq(theta1_var, theta2_var, t, h, num):
             
     return(chaos_index)
 
-## Plot of the 'chaos' heat map
+## Phase portrait of 'chaos' index in angle space
 
 theta1 = 0
 theta2 = 0
 w1 = 0
 w2 = 0
 
-chaos_index_angle = chaos_angle(w1, w2, t, h, 1000)
-chaos_index_freq = chaos_freq(theta1, theta2, t, h, 1000)
+res = 100
+# res = 1000 # This resolution will take far longer, around half and hour
+
+chaos_index_angle = chaos_angle(w1, w2, t, h, res)
 
 fig1 = plt.figure(1, figsize=(6,5))
 ax1 = fig1.add_subplot(1,1,1)
 
-dark_blue = "#030021"
-white = "#FFFFFF"
+palette = np.array([
+    [10/255,  5/255,  40/255],
+    [30/255,  20/255, 70/255],
+    [120/255, 150/255, 200/255],
+    [1.0,     1.0,     1.0],
+])
 
-cmap = mcolors.LinearSegmentedColormap.from_list("darkblue_white", [dark_blue, white])
+x = np.linspace(0, 1, palette.shape[0])
+
+cmap = mcolors.LinearSegmentedColormap.from_list("glowmap", list(zip(x, palette)))
 
 im1 = ax1.imshow(np.log10(chaos_index_angle + 1e-8),
                 extent=[-180,180,-180,180],
@@ -269,28 +208,32 @@ cbar = fig1.colorbar(im1, ax=ax1)
 cbar.set_label(r'$\log_{10}(\Delta)$')
 ax1.set_xlabel(r'$\theta_1$ (deg)')
 ax1.set_ylabel(r'$\theta_2$ (deg)')
+plt.title(f"Chaos index in angle space for ω₁ = {w1:.3g} rad/s and ω₂ = {w2:.3g} rad/s", fontsize=16)
 
-filename = f"DP_angle_{w1}_{w2}.png"
+
+filename = f"DP_angle_{w1}_{w2}_{res}.png"
 plt.savefig(filename, dpi=600)
 
 plt.show()
 
+## Phase portrait of 'chaos' index in frequency space
+
+chaos_index_freq = chaos_freq(theta1, theta2, t, h, res)
 
 fig2 = plt.figure(2, figsize=(6,5))
 ax2 = fig2.add_subplot(1,1,1)
 
-cmap = mcolors.LinearSegmentedColormap.from_list("darkblue_white", [dark_blue, white])
-
 im2 = ax2.imshow(np.log10(chaos_index_freq + 1e-8),
-                extent=[-180,180,-180,180],
+                extent=[-30,30,-30,30],
                 origin='lower', cmap=cmap, aspect='auto')
 
 cbar = fig2.colorbar(im2, ax=ax2)
 cbar.set_label(r'$\log_{10}(\Delta)$')
 ax2.set_xlabel(r'$\omega_1$ (Hz)')
 ax2.set_ylabel(r'$\omega_2$ (Hz)')
+plt.title(f"Chaos index in angular frequency space for θ₁ = {np.degrees(theta1):.3g}° and θ₂ = {np.degrees(theta2):.3g}°", fontsize=16)
 
-filename = f"DP_freq_{w1:.2f}_{w2:.2f}.png"
+filename = f"DP_freq_{w1:.2f}_{w2:.2f}_{res}.png"
 plt.savefig(filename, dpi=600)
 
 plt.show()
