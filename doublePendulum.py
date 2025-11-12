@@ -95,7 +95,7 @@ ax0.plot(X2, Y2, color='red')
 
 plt.xlabel("X", fontsize=14)
 plt.ylabel("Y", fontsize=14)
-plt.title(f"Trajectory of double pendulum at θ₁ = {np.degrees(theta1_0):.3g}° and θ₂ = {np.degrees(theta2_0):.3g}°", fontsize=16)
+plt.title(f"Trajectory of double pendulum at \n θ₁ = {np.degrees(theta1_0):.3g}° and θ₂ = {np.degrees(theta2_0):.3g}°", fontsize=16)
 ax0.set_aspect('equal')
 
 plt.show()
@@ -208,7 +208,7 @@ cbar = fig1.colorbar(im1, ax=ax1)
 cbar.set_label(r'$\log_{10}(\Delta)$')
 ax1.set_xlabel(r'$\theta_1$ (deg)')
 ax1.set_ylabel(r'$\theta_2$ (deg)')
-plt.title(f"Chaos index in angle space for ω₁ = {w1:.3g} rad/s and ω₂ = {w2:.3g} rad/s", fontsize=16)
+plt.title(f"Chaos index in angle space for \n ω₁ = {w1:.3g} rad/s and ω₂ = {w2:.3g} rad/s", fontsize=16)
 
 
 filename = f"DP_angle_{w1}_{w2}_{res}.png"
@@ -231,7 +231,7 @@ cbar = fig2.colorbar(im2, ax=ax2)
 cbar.set_label(r'$\log_{10}(\Delta)$')
 ax2.set_xlabel(r'$\omega_1$ (Hz)')
 ax2.set_ylabel(r'$\omega_2$ (Hz)')
-plt.title(f"Chaos index in angular frequency space for θ₁ = {np.degrees(theta1):.3g}° and θ₂ = {np.degrees(theta2):.3g}°", fontsize=16)
+plt.title(f"Chaos index in angular frequency space for \n θ₁ = {np.degrees(theta1):.3g}° and θ₂ = {np.degrees(theta2):.3g}°", fontsize=16)
 
 filename = f"DP_freq_{w1:.2f}_{w2:.2f}_{res}.png"
 plt.savefig(filename, dpi=600)
